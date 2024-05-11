@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+   
+    <!-- definindo a codificação dos caracteres do documento no estándar UTF-8 -->
+    <meta charset="UTF-8">
+    
+    <!-- deshabilitando o dimensionamento indesejado do site em dispositivos mobile --> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, 
+    maximum-scale=1.0, user-scalable=no">
+    
+    <title>WebMApp Teste V2 (JQuery)</title>
+    
+    <!-- agregando o external CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
+    <link rel="stylesheet", href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;1,100;1,300;1,400;1,500&display=swap">
+    
+    <!-- agregando e as bibliotecas Js -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-KyZXEAg3QhqLMpG8r+Knujsl5+kbzoD1TKVsYDkF93NL2zz+aXnqNfZ4YcJ8O5f+" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-KCo3fjpkk2koj3Kzo0s9Yq/yWdHX7+WnUrBcT0E3E0b4JzavDYDDG0BGqZ8kLymw51nvZdZX0PzdPY5Ul4Zk+g==" crossorigin=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.0"></script>
+    
+    <!-- agregando o estilo do contêiner de mapa, com a altura máxima possível  -->
+    <style>
+        
+        #mapid {height: 100vh;}  
+        *{
+            font-family: 'Roboto', sans-serif;
+        }
+        
+    </style>
+    
+</head>
+
+<body>
+    
+    <div class="header">
+        <!-- criar header depois -->
+    </div>
+    
+    <!-- criando o painel lateral para os botões do aplicativo usando o Bootstrap para layout de colunas -->
+    <div id="side-bar" class="col-md-3">
+        <div class="container">
+          <h3>WebMApp</h3>
+          <p>Teste V2.3</p>
+          <br>
+          
+           <!-- criando btn para definir locaização  -->
+           <h4 style="font-size: 16px">Defina sua localização</h4>
+           <input type="text" id="location-input">
+           <label for="location-imput" style="font-weight: normal">Inserir local</label>
+           <br>
+           <button onclick="setMapView()">Ver localização no mapa</button>
+           <br><br>
+          
+           <!-- criando o form para upload de dados -->
+           <form id="upload_csv"> 
+               <input type="file" name="file" id="csv_file" accept=".csv"/>
+               <button type="button" id="upload">Carregar dados</button>
+           </form> 
+           <br>
+           
+           <!-- criando o selector de arquivo dinâmico -->
+           <label for="dropdown-lat">Latitude</label>
+           <select id="dropdown-lat">
+               
+               <!-- as informações carregarão ao executar o script Js/jQuery para parse de arquivo csv -->
+               
+           </select>
+           <br>
+           
+           <label for="dropdown-lng">Longitude</label>
+           <select id="dropdown-lng">
+               
+               <!-- as informações carregarão ao executar o script Js/jQuery para parse de arquivo csv -->
+               
+           </select>
+           <br>
+           
+           <label for="dropdown-var">Variável</label>
+           <select id="dropdown-var">
+               
+               <!-- as informações carregarão ao executar o script Js/jQuery para parse de arquivo csv -->
+               
+           </select>
+           <br><br>
+           
+           <!-- criando selector para o raio do marcador de mapa -->
+           <label for="radius-multiplier">Definir raio do marcador</label>
+            <select id="radius-multiplier">
+                <option value="0.01">0.01x</option>
+                <option value="0.1">0.1x</option>
+                <option value="1.5">1.5x</option>
+                <option value="2">2.0x</option>
+                <option value="2.5">2.5x</option>
+                <option value="3">3.0x</option>
+            </select>
+            <br>
+           
+            <!-- criando botão para chamar a fx. Js/jQuery para parse de arquivo -->
+            <button type="button" id="plot">Vizualizar dados</button>
+            <br><br>
+            <button type="button" id="clear-markers">Limpar mapa</button>
+            <button type="button" id="clear-all">Limpar tudo</button>
+    
+       </div>
+       
+    </div>
+   
+    <!-- criando o contêiner de mapa Leaflet usando Boostrap para layout de colunas -->
+    <div id="mapid" class="col-md-9"></div> 
+    
+    <script>
+        
+        // inicializando o mapa do Leaflet através da variavel 'webmap', que irá armazenar todas as propriedades do objeto de mapa (coordenadas, zoom, etc) e por meio do objeto 'lyrOSM', que armazena os raster tiles (imagens de mapa) do repositório do servidor OpenLayers, permitindo a visualização do mapa dentro do contêiner Leaflet //
+        var webmap = L.map('mapid').setView([-14.235, -51.9253], 4);
+        lyrOSM = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap | <a href="https://www.icict.fiocruz.br/">Laboratório de Geoprocessamento, LIS/LabGeo - Icict/Fiocruz</a>'
+  });
+        // agregando o novo objeto 'lyrOSM' ao mapa (var webmap) //
+        webmap.addLayer(lyrOSM);
+        
+        
+        // Fx. para inserir localização no mapa: usa a API OpenStreetMap Nominatim para recuperar as localizações //
+       
+       function setMapView() {
+          var locationInput = document.getElementById('location-input').value;
+          if (locationInput !== "") {
+              var url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + locationInput;
+              fetch(url)
+                  .then(function(response) {
+                      return response.json();
+                  })
+                  .then(function(data) {
+                      if (data.length > 0) {
+                          var latitude = data[0].lat;
+                          var longitude = data[0].lon;
+                          webmap.setView([latitude, longitude], 7);
+                      } else {
+                          alert("Local não encontrado.");
+                      }
+                  })
+                  .catch(function(error) {
+                      console.log(error);
+                      alert("Ocorreu um erro ao buscar os dados de localização.");
+                  });
+          } else {
+              alert("Por favor insira um nome de local.");
+          }
+      }
+        
+        
+        // agregando script para parse de arquivo CSV //
+
+        var data = [];
+
+        $('#upload').on('click', function(
+ ) {
+        var file = $('#csv_file').prop('files')[0];
+        Papa.parse(file, {
+            header: true,
+            dynamicTyping: true,
+            complete: function(results) {
+                data = results.data;
+                var columns = results.meta.fields;
+                for(var i in columns) {
+                    $('#dropdown-lat, #dropdown-lng, #dropdown-var').append($('<option></option>').attr('value', columns[i]).text(columns[i]));
+                }
+            }
+        });
+ });
+
+        // criando a camada de grupo de marcadores //
+        
+        var markers = L.layerGroup().addTo(webmap);
+        
+        // agregando script para plotar dados //
+        
+        $('#plot').on('click', function() {
+            
+            // limpando marcadores //
+            markers.clearLayers();
+            
+            // preenchendo dropdowns dinâmicos //
+            var selectedColumnLat = $('#dropdown-lat').val();
+            var selectedColumnLng = $('#dropdown-lng').val();
+            var selectedColumnVar = $('#dropdown-var').val();
+
+            var latData = data.map(function(row) { return row[selectedColumnLat]; });
+            var lngData = data.map(function(row) { return row[selectedColumnLng]; });
+            var varData = data.map(function(row) { return row[selectedColumnVar]; });
+            
+            // Use the getRadius function to calculate the radius, passing the multiplier as an argument
+        
+            function getRadius(varData, multiplier) {
+                return varData * multiplier;
+            }
+            var multiplier = Number($("#radius-multiplier").val());
+
+            for (var i = 0; i < latData.length; i++) {
+                if (varData[i] != 0) {
+                    var radius = getRadius(varData[i], multiplier);
+                    var marker = L.circleMarker([latData[i], lngData[i]], {
+                    stroke: true, //true/false para a borda do círculo
+                    color: '#dd1c77', //color da borda quando habilitada
+                    opacity: 1, //opacidade da borda, entre 0-1
+                    weight: 2, //tamanho da borda, entre 0-1
+                    fill: true, //true/false para preenchimento do círculo
+                    fillColor: '#dd1c77', //cód. HEX ou nome da cor
+                    fillOpacity: 0.2, //opacidade de preenchimento, entre 0-1
+                    radius: radius,
+                    });
+                    markers.addLayer(marker);
+            }
+            
+        }
+    
+    });
+        
+    // criando fx. para limpar marcadores de mapa //
+        
+    $('#clear-markers').on('click' , function () {
+        markers.clearLayers();
+    });
+        
+    // criando fx. para limpar dados do aplicativo //
+    
+    $('#clear-all').on('click' , function () {
+        $('#csv_file').val('');
+        data = [];
+        $('#dropdown-lat').val('');
+        $('#dropdown-lng').val('');
+        $('#dropdown-var').val('');
+        $('#radius-multiplier').val('');
+        markers.clearLayers();
+    });
+        
+    
+        
+    </script>
+</body>
+</html>
