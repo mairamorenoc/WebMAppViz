@@ -1,4 +1,4 @@
-# WebMAppViz # [![DOI](https://zenodo.org/badge/799268548.svg)](https://zenodo.org/doi/10.5281/zenodo.11179803)
+# WebMAppViz [![DOI](https://zenodo.org/badge/799268548.svg)](https://zenodo.org/doi/10.5281/zenodo.11179803)
 
 This web mapping application allows you to create interactive maps to visualize your own data set on the web. Due to its lightweight thin-client architecture, all data is processed in the browser.
 The main functionalities of the web application include:
