@@ -1,11 +1,11 @@
-@software{moreno_castillo_2024_11179804,
-  author       = {Moreno Castillo, Maira Alejandra},
-  title        = {{WebMAppViz: A web mapping aplication for 
-                   geographical data visualization}},
-  month        = may,
-  year         = 2024,
-  publisher    = {Zenodo},
-  version      = {v1.0.0},
-  doi          = {10.5281/zenodo.11179804},
-  url          = {https://doi.org/10.5281/zenodo.11179804}
-}
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Moreno Castillo"
+  given-names: "Maira Alejandra"
+  orcid: "https://orcid.org/0000-0002-2910-2970"
+title: "WebMAppViz: A web mapping aplication for geographical data visualization"
+version: 1.0.0
+doi: 10.5281/zenodo.11179804
+date-released: 2024-05-11
+url: "https://github.com/mairamorenoc/WebMAppViz"
